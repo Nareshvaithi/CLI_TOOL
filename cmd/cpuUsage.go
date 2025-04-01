@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/shirou/gopsutil/v4/mem"
 	"github.com/spf13/cobra"
@@ -21,12 +22,7 @@ var (
 var cpuUsageCmd = &cobra.Command{
 	Use:   "cpuUsage",
 	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Long: "TO FIND STATUS OF THE CPU command: cpuUsage --critical percent -- warning percent",
 	Run: func(cmd *cobra.Command, args []string) {
 		critical,criticalErr = cmd.Flags().GetFloat64("critical")
 		warning,warningErr = cmd.Flags().GetFloat64("warning")
@@ -40,11 +36,13 @@ to quickly create a Cobra application.`,
 		}
 		fmt.Println(critical)
 		fmt.Println(warning)
-		cpuusedPercent,cpuErr := findCpuUsage()
+		cpuUsedPercent,cpuErr := findCpuUsage()
 		if cpuErr != nil {
 			log.Fatal(cpuErr)
 		}
-		fmt.Println(cpuusedPercent,"cpu")
+		status,exitCode := findStatus(cpuUsedPercent,critical,warning)
+		fmt.Printf("%s[C:%.1f,W:%.1f]:CPU usage - %.2f%%\n",status,critical,warning,cpuUsedPercent)
+		os.Exit(exitCode)
 	},
 }
 
